@@ -943,7 +943,7 @@ const io = new Server({
   },
 });
 
-const portSocket = process.env.PORT || 4000; // Sử dụng cổng được Render.com cung cấp hoặc mặc định là 4000
+const portSocket = 4000; // Sử dụng cổng được Render.com cung cấp hoặc mặc định là 4000
 const host = '0.0.0.0'; // Render.com cung cấp địa chỉ host là 0.0.0.0
 
 const onlineUsers = [];
