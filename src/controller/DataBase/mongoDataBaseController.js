@@ -1,7 +1,7 @@
 import express from 'express'
 import jwt from "jsonwebtoken";
 import fs from "fs";
-import { Server } from "socket.io";
+const Server = require('socket.io')(4000);
 import { v2 as cloudinary } from "cloudinary";
 import CRUD from "./CRUD";
 const { MongoClient, ObjectId } = require("mongodb");
