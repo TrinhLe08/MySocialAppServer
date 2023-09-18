@@ -1,0 +1,10 @@
+GET http://localhost:8080/kvip/100/TrinhLe100
+Authorization: Beaer "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVHJpbmhMZTA4IiwiaWF0IjoxNjkwMDE3MDYzLCJleHAiOjE2OTAwMTcwOTN9.forzUN0_ZoyeLnRjDtIy0VMJNCuyNh_AB8ztwJnn3Y0
+# ###
+# POST http://localhost:8080/login
+# Content-Type: application/json
+
+# {
+#    "name" : "TrinhLe08",
+#    "mail" : "123@gmail.com"
+# }
