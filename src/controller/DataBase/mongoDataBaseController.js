@@ -1,3 +1,4 @@
+import express from 'express'
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import { Server } from "socket.io";
@@ -6,6 +7,10 @@ import CRUD from "./CRUD";
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 const multer = require("multer");
+const http = require('http');
+const app = express();
+const server = http.createServer(app)
+
 
 // cloudiary
 cloudinary.config({
@@ -938,7 +943,8 @@ const io = new Server({
   },
 });
 
-io.listen(4000);
+const portSocket = process.env.PORT || 4000; // Sử dụng cổng được Render.com cung cấp hoặc mặc định là 4000
+const host = '0.0.0.0'; // Render.com cung cấp địa chỉ host là 0.0.0.0
 
 const onlineUsers = [];
 const notificationUsers = []
@@ -1007,6 +1013,11 @@ io.on("connection", (socket) => {
       { message: OldMessage }
     );
   });
+});
+
+// io.listen(4000);
+server.listen(portSocket, host, () => {
+  console.log(`Server is running on http://${host}:${portSocket}`);
 });
 
 module.exports = {
