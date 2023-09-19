@@ -1,6 +1,6 @@
 import express from 'express'
 import configViewEngine from './configs/viewEngine';
-import initWebRoute from './router/web';
+import initWebRoute from './route/web'
 import MongGoDB from './controller/DataBase/mongoDataBaseController'
 import { Server } from 'socket.io'
 require('dotenv').config();
