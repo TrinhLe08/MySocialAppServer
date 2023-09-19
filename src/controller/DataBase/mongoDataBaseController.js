@@ -87,6 +87,7 @@ const RegisterUser = async (req, res) => {
 };
 
 const LoginUser = async (req, res) => {
+  console.log(req.body);
   try {
     await Promise.all([clientUser.connect(), clientPost.connect()]);
     // Kiểm tra đầu vào
@@ -938,8 +939,8 @@ const SuugestUser = async (req, res) => {
 // Socket
 const io = new Server({
   cors: {
-    // origin: "http://localhost:3000",
-    origin: "https://nextclient.onrender.com",
+    origin: "http://localhost:3000",
+    // origin: "https://nextclient.onrender.com",
     methods: ["GET", "POST"],
   },
 });
