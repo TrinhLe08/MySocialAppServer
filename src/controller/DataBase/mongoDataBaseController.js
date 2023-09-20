@@ -940,7 +940,7 @@ const SuugestUser = async (req, res) => {
 const io = new Server({
   cors: {
     // origin: "http://localhost:3000",
-    origin: "https://nextclient-nprzs88dm-trinhle08.vercel.app",
+    origin: "https://nextclient-13tlo5jj6-trinhle08.vercel.app",
     methods: ["GET", "POST"],
   },
 });
