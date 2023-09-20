@@ -945,12 +945,13 @@ const io = new Server({
   },
 });
 
-const portSocket = 4000; // Sử dụng cổng được Render.com cung cấp hoặc mặc định là 4000
+const portSocket = 4000; 
 
 const onlineUsers = [];
 const notificationUsers = []
 
 io.on("connection", (socket) => {
+  console.log(socket.id, 954);
   socket.on("joinRoom", (data) => {
     console.log("Data received", data, 846);
     socket.join(data);
