@@ -14,9 +14,6 @@ const server = http.createServer(app)
 
 app.use(morgan('combined'))
 app.use(bodyParser.json());
-app.use(cors({
-    origin: 'http://localhost:3000',
-  }));
 app.options('*', cors());
 
 // view enginer
