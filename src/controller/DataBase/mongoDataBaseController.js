@@ -942,6 +942,8 @@ const io = new Server({
     // origin: "http://localhost:3000",
     origin: "https://nextclient-nu.vercel.app",
     methods: ["GET", "POST"],
+    allowedHeaders: ["nextproject"],
+    credentials: true
   },
 });
 

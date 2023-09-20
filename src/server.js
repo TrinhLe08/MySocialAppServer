@@ -14,7 +14,9 @@ const server = http.createServer(app)
 
 app.use(morgan('combined'))
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',
+  }));
 app.options('*', cors());
 
 // view enginer
@@ -25,6 +27,7 @@ initWebRoute(app)
 
 // dataBase
 MongGoDB.connectToDB(app)
+
 
 // 404 
 app.use((req,res) => {
