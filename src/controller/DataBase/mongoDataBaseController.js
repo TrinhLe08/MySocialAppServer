@@ -1,4 +1,4 @@
-import express from 'express'
+import express from "express";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 const { Server } = require("socket.io");
@@ -7,10 +7,9 @@ import CRUD from "./CRUD";
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 const multer = require("multer");
-const http = require('http');
+const http = require("http");
 const app = express();
-const server = http.createServer(app)
-
+const server = http.createServer(app);
 
 // cloudiary
 cloudinary.config({
@@ -164,16 +163,16 @@ const FindUser = async (req, res) => {
 
 const ViewOneUser = async (req, res) => {
   try {
-   console.log(req.body);
-   const User = await CRUD.findById(dbUser, dataUser, req.body.myId)
-   console.log(User, 163);
-   if (User) {
-    return res.send({ User })
-   }
+    console.log(req.body);
+    const User = await CRUD.findById(dbUser, dataUser, req.body.myId);
+    console.log(User, 163);
+    if (User) {
+      return res.send({ User });
+    }
   } catch (err) {
     console.log(err);
   }
-}
+};
 
 // Upload Img
 const UpdateImgUser = async (req, res) => {
@@ -281,17 +280,21 @@ const UpdateImgUser = async (req, res) => {
 
 // Update Password
 const UpdatePassword = async (req, res) => {
-  const data = req.body.values;
+  try {
+    const data = req.body.values;
 
-  const User = await CRUD.updateOneData(dbUser, dataUser, req.body.userId, {
-    password: data.newPassword,
-  });
+    const User = await CRUD.updateOneData(dbUser, dataUser, req.body.userId, {
+      password: data.newPassword,
+    });
 
-  console.log(User);
+    console.log(User);
 
-  delete User.password;
+    delete User.password;
 
-  return res.send({ Vip: "done" });
+    return res.send({ Vip: "done" });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // up Post *
@@ -411,32 +414,35 @@ const UpPost = async (req, res) => {
 
 // view Post
 const ViewPost = async (req, res) => {
-  console.log(req.body);
-  const userId = req.body.userId;
+  try {
+    const userId = req.body.userId;
 
-  const View = await CRUD.viewData(dbPost, dataPost);
-  // Lọc ra số bài đã like
-  const ViewPost = View.map((obj) => ({
-    ...obj,
-    like: obj.arrayLike.includes(userId),
-  }));
+    const View = await CRUD.viewData(dbPost, dataPost);
+    // Lọc ra số bài đã like
+    const ViewPost = View.map((obj) => ({
+      ...obj,
+      like: obj.arrayLike.includes(userId),
+    }));
 
-  console.log(ViewPost, 391);
+    console.log(ViewPost, 391);
 
-  if (ViewPost.length < 5) {
+    if (ViewPost.length < 5) {
+      var TopPost = ViewPost.sort(function (a, b) {
+        return b.numberOflike - a.numberOflike;
+      }).slice(0, ViewPost.length);
+      return res.send({ ViewPost, TopPost });
+    }
+
     var TopPost = ViewPost.sort(function (a, b) {
       return b.numberOflike - a.numberOflike;
-    }).slice(0, ViewPost.length);
+    }).slice(0, 5);
+
+    console.log(TopPost, 393);
+
     return res.send({ ViewPost, TopPost });
+  } catch (err) {
+    console.log(err);
   }
-
-  var TopPost = ViewPost.sort(function (a, b) {
-    return b.numberOflike - a.numberOflike;
-  }).slice(0, 5);
-
-  console.log(TopPost, 393);
-
-  return res.send({ ViewPost, TopPost });
 };
 
 // up DataPost for User
@@ -510,155 +516,164 @@ const DeletePost = async (req, res) => {
 
 // Like
 const LikePost = async (req, res) => {
-  console.log(req.body);
-  const data = req.body;
-  const like = data.setLike;
-  const userId = data.userId;
-  const postId = data.postId;
+  try {
+    const data = req.body;
+    const like = data.setLike;
+    const userId = data.userId;
+    const postId = data.postId;
 
-  if (like) {
-    // Find Post
-    const post = await CRUD.findById(dbPost, dataPost, postId);
+    if (like) {
+      // Find Post
+      const post = await CRUD.findById(dbPost, dataPost, postId);
 
-    const arrayLike = post.arrayLike;
-    const numberLike = post.numberOflike;
-    arrayLike.push(userId);
-    // Update Post + Id User
-    const updateNumberLike = await CRUD.updateOneDataAndReturn(
-      dbPost,
-      dataPost,
-      postId,
-      { numberOflike: numberLike + 1, arrayLike: arrayLike }
-    );
-    // Update User
-    const User = await CRUD.findById(dbUser, dataUser, userId);
-    const numberLikeUser = User.numberOfLike;
-    const UserUpdate = await CRUD.updateOneDataAndReturn(
-      dbUser,
-      dataUser,
-      userId,
-      { numberOfLike: numberLikeUser + 1 }
-    );
-    // View Post
-    const ViewPost = await CRUD.viewData(dbPost, dataPost);
-    const updatedViewPost = ViewPost.map((obj) => ({
-      ...obj,
-      like: obj.arrayLike.includes(userId),
-    }));
-    // My Post
-    const filterMyPost = ViewPost.filter((oject) => oject.userId === userId);
-    const myPost = filterMyPost.map((obj) => ({
-      ...obj,
-      like: obj.arrayLike.includes(userId),
-    }));
-    console.log(myPost, "my Post 318");
-    return res.send({ updatedViewPost, myPost, UserUpdate });
-    // Un Like -->
-  } else if (!like) {
-    // Find Post
-    const post = await CRUD.findById(dbPost, dataPost, postId);
-    const arrayLike = post.arrayLike;
-    const numberLike = post.numberOflike;
-    arrayLike.splice(userId, 1);
-    // Update Post
-    const updateNumberLike = await CRUD.updateOneDataAndReturn(
-      dbPost,
-      dataPost,
-      postId,
-      { numberOflike: numberLike - 1, arrayLike: arrayLike }
-    );
-    console.log(updateNumberLike, "476");
-    // Update User
-    const User = await CRUD.findById(dbUser, dataUser, userId);
-    const numberLikeUser = User.numberOfLike;
-    const UserUpdate = await CRUD.updateOneDataAndReturn(
-      dbUser,
-      dataUser,
-      userId,
-      { numberOfLike: numberLikeUser - 1 }
-    );
-    // ViewPost
-    const ViewPost = await CRUD.viewData(dbPost, dataPost);
-    const updatedViewPost = ViewPost.map((obj) => ({
-      ...obj,
-      like: obj.arrayLike.includes(userId),
-    }));
-    const filterMyPost = ViewPost.filter((oject) => oject.userId === userId);
-    const myPost = filterMyPost.map((obj) => ({
-      ...obj,
-      like: obj.arrayLike.includes(userId),
-    }));
-    console.log(myPost, "my Post 318");
-    return res.send({ updatedViewPost, myPost, UserUpdate });
+      const arrayLike = post.arrayLike;
+      const numberLike = post.numberOflike;
+      arrayLike.push(userId);
+      // Update Post + Id User
+      const updateNumberLike = await CRUD.updateOneDataAndReturn(
+        dbPost,
+        dataPost,
+        postId,
+        { numberOflike: numberLike + 1, arrayLike: arrayLike }
+      );
+      // Update User
+      const User = await CRUD.findById(dbUser, dataUser, userId);
+      const numberLikeUser = User.numberOfLike;
+      const UserUpdate = await CRUD.updateOneDataAndReturn(
+        dbUser,
+        dataUser,
+        userId,
+        { numberOfLike: numberLikeUser + 1 }
+      );
+      // View Post
+      const ViewPost = await CRUD.viewData(dbPost, dataPost);
+      const updatedViewPost = ViewPost.map((obj) => ({
+        ...obj,
+        like: obj.arrayLike.includes(userId),
+      }));
+      // My Post
+      const filterMyPost = ViewPost.filter((oject) => oject.userId === userId);
+      const myPost = filterMyPost.map((obj) => ({
+        ...obj,
+        like: obj.arrayLike.includes(userId),
+      }));
+      console.log(myPost, "my Post 318");
+      return res.send({ updatedViewPost, myPost, UserUpdate });
+      // Un Like -->
+    } else if (!like) {
+      // Find Post
+      const post = await CRUD.findById(dbPost, dataPost, postId);
+      const arrayLike = post.arrayLike;
+      const numberLike = post.numberOflike;
+      arrayLike.splice(userId, 1);
+      // Update Post
+      const updateNumberLike = await CRUD.updateOneDataAndReturn(
+        dbPost,
+        dataPost,
+        postId,
+        { numberOflike: numberLike - 1, arrayLike: arrayLike }
+      );
+      console.log(updateNumberLike, "476");
+      // Update User
+      const User = await CRUD.findById(dbUser, dataUser, userId);
+      const numberLikeUser = User.numberOfLike;
+      const UserUpdate = await CRUD.updateOneDataAndReturn(
+        dbUser,
+        dataUser,
+        userId,
+        { numberOfLike: numberLikeUser - 1 }
+      );
+      // ViewPost
+      const ViewPost = await CRUD.viewData(dbPost, dataPost);
+      const updatedViewPost = ViewPost.map((obj) => ({
+        ...obj,
+        like: obj.arrayLike.includes(userId),
+      }));
+      const filterMyPost = ViewPost.filter((oject) => oject.userId === userId);
+      const myPost = filterMyPost.map((obj) => ({
+        ...obj,
+        like: obj.arrayLike.includes(userId),
+      }));
+      console.log(myPost, "my Post 318");
+      return res.send({ updatedViewPost, myPost, UserUpdate });
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
 // View Comment
 const ViewComment = async (req, res) => {
-  console.log(req.body, "12");
+  try {
+    const postId = req.body.postId;
 
-  const postId = req.body.postId;
+    const Post = await CRUD.findById(dbPost, dataPost, postId);
 
-  const Post = await CRUD.findById(dbPost, dataPost, postId);
+    const ViewComment = Post.comment;
 
-  const ViewComment = Post.comment;
+    console.log(ViewComment, "ViewComment");
 
-  console.log(ViewComment, "ViewComment");
-
-  return res.send(ViewComment);
+    return res.send(ViewComment);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // Comment
 const CommentPost = async (req, res) => {
-  console.log(req.body);
-  const postId = req.body.postId;
-  const userId = req.body.userId;
-  const data = {
-    linkAvatar: req.body.linkAvatar,
-    name: req.body.name,
-    content: req.body.content,
-  };
+  try {
+    const postId = req.body.postId;
+    const userId = req.body.userId;
+    const data = {
+      userId: req.body.userId,
+      linkAvatar: req.body.linkAvatar,
+      name: req.body.name,
+      content: req.body.content,
+    };
 
-  const post = await CRUD.findById(dbPost, dataPost, postId);
+    const post = await CRUD.findById(dbPost, dataPost, postId);
 
-  const arrayComment = post.comment;
-  const numberComment = post.numberOfComment;
+    const arrayComment = post.comment;
+    const numberComment = post.numberOfComment;
 
-  console.log(arrayComment, "arrayComment");
+    console.log(arrayComment, "arrayComment");
 
-  arrayComment.push(data);
+    arrayComment.push(data);
 
-  console.log(arrayComment, "arrayComment2");
+    console.log(arrayComment, "arrayComment2");
 
-  const updateCommentPost = await CRUD.updateOneDataAndReturn(
-    dbPost,
-    dataPost,
-    postId,
-    { comment: arrayComment, numberOfComment: numberComment + 1 }
-  );
+    const updateCommentPost = await CRUD.updateOneDataAndReturn(
+      dbPost,
+      dataPost,
+      postId,
+      { comment: arrayComment, numberOfComment: numberComment + 1 }
+    );
 
-  // Update User
-  const User = await CRUD.findById(dbUser, dataUser, userId);
-  const numberCommentUser = User.numberOfComment;
-  const UserUpdate = await CRUD.updateOneDataAndReturn(
-    dbUser,
-    dataUser,
-    userId,
-    { numberOfComment: numberCommentUser + 1 }
-  );
+    // Update User
+    const User = await CRUD.findById(dbUser, dataUser, userId);
+    const numberCommentUser = User.numberOfComment;
+    const UserUpdate = await CRUD.updateOneDataAndReturn(
+      dbUser,
+      dataUser,
+      userId,
+      { numberOfComment: numberCommentUser + 1 }
+    );
 
-  console.log(updateCommentPost, "updateCommentPost");
+    console.log(updateCommentPost, "updateCommentPost");
 
-  const ViewPost = await CRUD.viewData(dbPost, dataPost);
+    const ViewPost = await CRUD.viewData(dbPost, dataPost);
 
-  const updatedViewPost = ViewPost.map((obj) => ({
-    ...obj,
-    like: obj.arrayLike.includes(userId),
-  }));
+    const updatedViewPost = ViewPost.map((obj) => ({
+      ...obj,
+      like: obj.arrayLike.includes(userId),
+    }));
 
-  const myPost = ViewPost.filter((oject) => oject.userId === userId);
+    const myPost = ViewPost.filter((oject) => oject.userId === userId);
 
-  return res.send({ arrayComment, updatedViewPost, myPost, UserUpdate });
+    return res.send({ arrayComment, updatedViewPost, myPost, UserUpdate });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // Other Profile
@@ -698,17 +713,17 @@ const OtherProfile = async (req, res) => {
 const ConnectFriend = async (req, res) => {
   try {
     const userId = req.body.userId;
-  
+
     const myId = req.body.myId;
-  
+
     const dataToConnect = req.body.dataUser;
-  
+
     const User = await CRUD.findById(dbUser, dataUser, userId);
-  
+
     const arrayConnect = User.connect;
-  
+
     arrayConnect.push(dataToConnect);
-  
+
     const UpdateUser = await CRUD.updateOneDataAndReturn(
       dbUser,
       dataUser,
@@ -716,19 +731,19 @@ const ConnectFriend = async (req, res) => {
       { connect: arrayConnect }
     );
     let connectUser = UpdateUser.connect.find((user) => user.userId === userId);
-  
+
     const View = await CRUD.viewData(dbPost, dataPost);
-  
+
     const ViewPost = View.filter((oject) => oject.userId === userId);
-    
+
     if (connectUser !== undefined) {
-      connectUser = false
+      connectUser = false;
     }
     const OtherUserProfile = Object.assign(UpdateUser, {
       Post: ViewPost,
       checkConnect: connectUser,
     });
-   console.log(connectUser, 725);
+    console.log(connectUser, 725);
     return res.send({ OtherUserProfile });
   } catch (err) {
     console.log(err);
@@ -873,83 +888,86 @@ const DeleteFriend = async (req, res) => {
 
 // MessageId
 const ConnectIdRom = async (req, res) => {
-  console.log(req.body, 810);
-  const userX = req.body.userX;
-  const userY = req.body.userY;
+  try {
+    const userX = req.body.userX;
+    const userY = req.body.userY;
 
-  const findMessage = await CRUD.findUserId(
-    dbMessage,
-    dataMessage,
-    userX,
-    userY
-  );
+    const findMessage = await CRUD.findUserId(
+      dbMessage,
+      dataMessage,
+      userX,
+      userY
+    );
 
-  if (!findMessage) {
-    const CreadId = await CRUD.createOneData(dbMessage, dataMessage, {
-      userX: req.body.userX,
-      userY: req.body.userY,
-      message: [],
-    });
-    const IdRoom = CreadId.insertedId.toString();
-    console.log(CreadId.insertedId.toString(), 824);
-    return res.send({ IdRoom, message: [] });
-  } else {
-    const IdRoom = findMessage._id.toString();
-    console.log(findMessage.message, 829);
-    return res.send({ IdRoom, OldMessage: findMessage.message });
+    if (!findMessage) {
+      const CreadId = await CRUD.createOneData(dbMessage, dataMessage, {
+        userX: req.body.userX,
+        userY: req.body.userY,
+        message: [],
+      });
+      const IdRoom = CreadId.insertedId.toString();
+      console.log(CreadId.insertedId.toString(), 824);
+      return res.send({ IdRoom, message: [] });
+    } else {
+      const IdRoom = findMessage._id.toString();
+      console.log(findMessage.message, 829);
+      return res.send({ IdRoom, OldMessage: findMessage.message });
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
 // Suggesst To FindUser
 const SuugestUser = async (req, res) => {
-  console.log(req.body);
-  const myId = req.body.myId;
+  try {
+    const myId = req.body.myId;
 
-  const AllUsers = await CRUD.viewData(dbUser, dataUser);
+    const AllUsers = await CRUD.viewData(dbUser, dataUser);
 
-  const User = await CRUD.findById(dbUser, dataUser, myId);
+    const User = await CRUD.findById(dbUser, dataUser, myId);
 
-  console.log(User, 891);
+    console.log(User, 891);
 
-  console.log(AllUsers.length);
+    console.log(AllUsers.length);
 
-  const Suggests = AllUsers.filter((user) =>
-    user.friend.find((f) => f.userId === myId)
-  );
+    const Suggests = AllUsers.filter((user) =>
+      user.friend.find((f) => f.userId === myId)
+    );
 
-  console.log(Suggests, 877);
+    console.log(Suggests, 877);
 
-  Suggests.forEach((suggest) => {
-    const index = AllUsers.indexOf(suggest);
-    console.log(index);
-    if (index > -1) {
-      AllUsers.splice(index, 1);
-    }
-  });
+    Suggests.forEach((suggest) => {
+      const index = AllUsers.indexOf(suggest);
+      console.log(index);
+      if (index > -1) {
+        AllUsers.splice(index, 1);
+      }
+    });
 
-  const AllUsersSuggest = AllUsers.filter(
-    (suggest) => suggest._id.toString() != myId
-  );
+    const AllUsersSuggest = AllUsers.filter(
+      (suggest) => suggest._id.toString() != myId
+    );
 
-  console.log(AllUsersSuggest, 911);
+    console.log(AllUsersSuggest, 911);
 
-  return res.send({ AllUsersSuggest });
+    return res.send({ AllUsersSuggest });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // Socket
-const io = new Server({
+const io = new Server(server, {
   cors: {
-    // origin: "http://localhost:3000",
-    origin: "https://nextclient-13tlo5jj6-trinhle08.vercel.app",
+    origin: "http://localhost:3000",
+    // origin: "https://nextclient-13tlo5jj6-trinhle08.vercel.app",
     methods: ["GET", "POST"],
   },
 });
-
-const portSocket = 4000; 
-
+const portSocket = 4000;
 const onlineUsers = [];
-const notificationUsers = []
-
+const notificationUsers = [];
 io.on("connection", (socket) => {
   console.log(socket.id, 954);
   socket.on("joinRoom", (data) => {
@@ -960,20 +978,20 @@ io.on("connection", (socket) => {
   //Notification
   socket.on("Notification", async (data) => {
     console.log(data, 852);
-    notificationUsers.push(data.userId)
-    io.emit("NotificationData", notificationUsers );
+    notificationUsers.push(data.userId);
+    io.emit("NotificationData", notificationUsers);
     let index = notificationUsers.indexOf(data.userId);
     if (index !== -1) {
       notificationUsers.splice(index, 1);
     }
-    if ( data.content == "Có Người Nhắn Tin ") {
+    if (data.content == "Có Người Nhắn Tin ") {
       console.log(12);
       const User = await CRUD.findById(dbUser, dataUser, data.userId);
-  
+
       const arrayConnect = User.connect;
-    
+
       arrayConnect.push(data);
-    
+
       const UpdateUser = await CRUD.updateOneDataAndReturn(
         dbUser,
         dataUser,
@@ -995,10 +1013,10 @@ io.on("connection", (socket) => {
   // Check Online
   socket.on("checkUserOnline", (data) => {
     // onlineUsers.slice(0,0)
-    onlineUsers.push(data.myId)
+    onlineUsers.push(data.myId);
     io.emit("Data check User Online", onlineUsers);
   });
-   // Message
+  // Message
   socket.on("DataMessage", async (data) => {
     const findMessage = await CRUD.findById(
       dbMessage,
@@ -1016,7 +1034,6 @@ io.on("connection", (socket) => {
     );
   });
 });
-
 // io.listen(4000);
 server.listen(portSocket, () => {
   console.log(`Server is running on http://localhost:${portSocket}`);

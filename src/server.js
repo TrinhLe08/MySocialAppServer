@@ -14,7 +14,7 @@ const server = http.createServer(app)
 
 app.use(morgan('combined'))
 app.use(bodyParser.json());
-app.options('*', cors());
+app.use(cors()); 
 
 // view enginer
 configViewEngine(app)

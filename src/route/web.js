@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken'
 import MongGoDB from '../controller/DataBase/mongoDataBaseController'
 import Middleware from '../controller/middlewares'
 let router = express.Router()
+const cors = require("cors");
+
 
 require('dotenv').config();
 
@@ -10,7 +12,7 @@ const keyToken =  process.env.KEY_JWT
 
 const initWebRoute = (app) => {
     // Login
-    router.post('/v/login', Middleware.middlewareLogin, MongGoDB.LoginUser )
+    router.post('/v/login', cors(), Middleware.middlewareLogin, MongGoDB.LoginUser )
     // Find
     router.post('/v/findUser', MongGoDB.FindUser)
      // Find
