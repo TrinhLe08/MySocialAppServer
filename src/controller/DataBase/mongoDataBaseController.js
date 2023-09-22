@@ -960,12 +960,12 @@ const SuugestUser = async (req, res) => {
 // Socket
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.URL_CLIENT,
     // origin: "https://nextclient-13tlo5jj6-trinhle08.vercel.app",
     methods: ["GET", "POST"],
   },
 });
-const portSocket = 4000;
+
 const onlineUsers = [];
 const notificationUsers = [];
 io.on("connection", (socket) => {
@@ -1035,8 +1035,8 @@ io.on("connection", (socket) => {
   });
 });
 // io.listen(4000);
-server.listen(portSocket, () => {
-  console.log(`Server is running on http://localhost:${portSocket}`);
+server.listen(process.env.PORT_SOCKET, () => {
+  console.log(`Server is running on http://localhost:${process.env.PORT_SOCKET}`);
 });
 
 module.exports = {
