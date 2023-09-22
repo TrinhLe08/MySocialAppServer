@@ -1,15 +1,16 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import fs from "fs";
-const { Server } = require("socket.io");
 import { v2 as cloudinary } from "cloudinary";
 import CRUD from "./CRUD";
+import { createServer } from "http";
 const { MongoClient, ObjectId } = require("mongodb");
+const { Server } = require("socket.io");
 require("dotenv").config();
 const multer = require("multer");
 const http = require("http");
 const app = express();
-const server = http.createServer(app);
+const server =  createServer();
 
 // cloudiary
 cloudinary.config({
@@ -959,7 +960,7 @@ const SuugestUser = async (req, res) => {
 
 
 // Socket
-const io = new Server({
+const io = new Server(server,{
   cors: {
     origin: `${process.env.URL_CLIENT}`,
     methods: ["GET", "POST"],
@@ -1035,7 +1036,7 @@ io.on("connection", (socket) => {
   });
 });
 // io.listen(4000);
-io.listen(process.env.PORT_SOCKET, () => {
+server.listen(process.env.PORT_SOCKET, () => {
   console.log(`Server is running on http://localhost:${process.env.PORT_SOCKET}`);
 });
 
