@@ -10,7 +10,7 @@ require("dotenv").config();
 const multer = require("multer");
 const http = require("http");
 const app = express();
-const server =  createServer();
+const server =  createServer(app);
 
 // cloudiary
 cloudinary.config({
@@ -960,11 +960,19 @@ const SuugestUser = async (req, res) => {
 
 
 // Socket
-const io = new Server(server,{
+// const io = new Server(server, {
+//   cors: {
+//     origin: `${process.env.URL_CLIENT}`,
+//     methods: ["GET", "POST"],
+//   },
+// });
+
+
+const io = require("socket.io")(server, {
   cors: {
     origin: `${process.env.URL_CLIENT}`,
-    methods: ["GET", "POST"],
-  },
+    methods: ["GET", "POST"]
+  }
 });
 
 const onlineUsers = [];
