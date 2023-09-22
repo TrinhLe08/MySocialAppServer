@@ -961,7 +961,6 @@ const SuugestUser = async (req, res) => {
 const io = new Server(server, {
   cors: {
     origin: process.env.URL_CLIENT,
-    // origin: "https://nextclient-13tlo5jj6-trinhle08.vercel.app",
     methods: ["GET", "POST"],
   },
 });

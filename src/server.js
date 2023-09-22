@@ -27,7 +27,7 @@ MongGoDB.connectToDB(app)
 
 // 404 
 app.use((req,res) => {
-    return res.send('404 Not Foud')
+    return res.send('Cút')
 })
 
 
