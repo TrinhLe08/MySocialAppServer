@@ -960,7 +960,7 @@ const SuugestUser = async (req, res) => {
 // Socket
 const io = new Server(server, {
   cors: {
-    origin: process.env.URL_CLIENT,
+    origin: `${process.env.URL_CLIENT}`,
     methods: ["GET", "POST"],
   },
 });
