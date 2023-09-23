@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import fs from "fs";
+import WebSocket from 'ws';
 import { v2 as cloudinary } from "cloudinary";
 import CRUD from "./CRUD";
 import { createServer } from "http";
@@ -970,7 +971,7 @@ const SuugestUser = async (req, res) => {
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: `${process.env.URL_CLIENT}`,
+    origin: "*:*",
     methods: ["GET", "POST"]
   }
 });
