@@ -1044,7 +1044,7 @@ io.on("connection", (socket) => {
   });
 });
 // io.listen(4000);
-server.listen(process.env.PORT_SOCKET, () => {
+server.listen(4000, () => {
   console.log(`Server is running on http://localhost:${process.env.PORT_SOCKET}`);
 });
 
