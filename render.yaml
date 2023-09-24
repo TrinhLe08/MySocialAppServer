@@ -1,7 +1,7 @@
 # render.yaml
 env:
-  - key: PORT
-    value: "4000"
+  - key: PORT_SOCKET
+    value: "443"
 routes:
   - path: "/socket.io/"
-    destination_override: "wss://nextsever.onrender.com:4000"
+    destination_override: "wss://nextsever.onrender.com:443"
