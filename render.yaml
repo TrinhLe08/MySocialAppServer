@@ -2,6 +2,6 @@ services:
   - name: nextsever
     env:
       - key: URL_CLIENT
-        value: https://my-social-app-client-6dwnhjbie-trinhle08.vercel.app
+        value: https://my-social-app-client-js2z8vlhf-trinhle08.vercel.app
     buildCommand: "npm install"
     startCommand: "npm start"
