@@ -966,7 +966,7 @@ const SuugestUser = async (req, res) => {
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: `${process.env.URL_CLIENT}`,
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
@@ -976,7 +976,7 @@ const notificationUsers = [];
 io.on("connection", (socket) => {
   console.log(socket.id, 954);
   socket.on("joinRoom", (data) => {
-    console.log("Data received", data, 846);
+    console.log("Data received", data, 979);
     socket.join(data);
   });
 
