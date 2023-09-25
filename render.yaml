@@ -3,5 +3,7 @@ services:
     env:
       - key: URL_CLIENT
         value: https://my-social-app-client-js2z8vlhf-trinhle08.vercel.app
+      - key: URL_SERVER_SOCKET
+        value: wss://nextsever.onrender.com:443
     buildCommand: "npm install"
     startCommand: "npm start"
