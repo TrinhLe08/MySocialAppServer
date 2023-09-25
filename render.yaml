@@ -1,7 +1,7 @@
-# render.yaml
-env:
-  - key: PORT_SOCKET
-    value: "443"
-routes:
-  - path: "/socket.io/"
-    destination_override: "wss://nextsever.onrender.com:443"
+services:
+  - name: nextsever
+    env:
+      - key: NEXT_PUBLIC_URL_SERVER_SOCKET
+        value: "wss://nextsever.onrender.com:443"
+    buildCommand: "npm install"
+    startCommand: "npm start"
