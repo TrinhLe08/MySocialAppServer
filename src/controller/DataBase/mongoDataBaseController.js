@@ -966,7 +966,7 @@ const SuugestUser = async (req, res) => {
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "*",
+    origin: `${process.env.URL_CLIENT}`,
     methods: ["GET", "POST"]
   }
 });
@@ -1040,9 +1040,9 @@ io.on("connection", (socket) => {
   });
 });
 // io.listen(4000);
-server.listen(process.env.PORT_SOCKET, () => {
-  console.log(`Server is running on http://localhost:${process.env.PORT_SOCKET}`);
-});
+// server.listen(process.env.PORT_SOCKET, () => {
+//   console.log(`Server is running on http://localhost:${process.env.PORT_SOCKET}`);
+// });
 
 module.exports = {
   connectToDB,
