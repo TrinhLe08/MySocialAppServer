@@ -99,6 +99,9 @@ const LoginUser = async (req, res) => {
     const user = await CRUD.findOneName(dbUser, dataUser, req.body.username);
     if (!user) {
       return res.status(404).json({ message: "Not Foud" });
+    } else if (user.password != req.body.password) {
+      console.log("No 400 from Login User");
+      return res.status(201).send({ message: "No 201 from Login User" });
     } else if (user.password === req.body.password) {
       // Token
       const token = jwt.sign(
@@ -124,18 +127,11 @@ const LoginUser = async (req, res) => {
       AllUsers.forEach((obj) => {
         delete obj.password;
       });
-
-      console.log(AllUsers, 122);
-
       delete user.password;
-
       return res
         .status(200)
         .send({ user, token, ViewPost, myPost, user, AllUsers });
-    } else if (user.password != req.body.password) {
-      console.log("No 400 from Login User");
-      return res.status(201).send({ message: "No 201 from Login User" });
-    }
+    } 
   } catch (error) {
     console.log(error);
   }

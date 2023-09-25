@@ -1,7 +1,7 @@
 services:
   - name: nextsever
     env:
-      - key: NEXT_PUBLIC_URL_SERVER_SOCKET
-        value: "wss://nextsever.onrender.com:443"
+      - key: URL_CLIENT
+        value: https://my-social-app-client-6dwnhjbie-trinhle08.vercel.app
     buildCommand: "npm install"
     startCommand: "npm start"
