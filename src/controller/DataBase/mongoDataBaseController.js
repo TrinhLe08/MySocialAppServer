@@ -1,13 +1,11 @@
+require("dotenv").config();
 import express from "express";
 import jwt from "jsonwebtoken";
 import fs from "fs";
-import WebSocket from 'ws';
 import { v2 as cloudinary } from "cloudinary";
-import CRUD from "./CRUD";
 import { createServer } from "http";
 const { MongoClient, ObjectId } = require("mongodb");
-const { Server } = require("socket.io");
-require("dotenv").config();
+import CRUD from "./CRUD";
 const multer = require("multer");
 const http = require("http");
 const app = express();
@@ -35,6 +33,7 @@ const clientMessage = new MongoClient(urlMessage);
 // DotENV
 const port = process.env.PORT;
 const dbName = process.env.DATABASE_USER_NAME;
+
 const dataUser = process.env.DATABASE_USER;
 const dataPost = process.env.DATABASE_POST;
 const dataMessage = process.env.DATABASE_MESAGE;
@@ -954,95 +953,6 @@ const SuugestUser = async (req, res) => {
     console.log(err);
   }
 };
-
-
-// Socket
-// const io = new Server(server, {
-//   cors: {
-//     origin: `${process.env.URL_CLIENT}`,
-//     methods: ["GET", "POST"],
-//   },
-// });
-
-const io = require("socket.io")(server, {
-  cors: {
-    origin: `${process.env.URL_CLIENT}`,
-    methods: ["GET", "POST"]
-  }
-});
-
-const onlineUsers = [];
-const notificationUsers = [];
-io.on("connection", (socket) => {
-  console.log(socket.id, 954);
-  socket.on("joinRoom", (data) => {
-    console.log("Data received", data, 979);
-    socket.join(data);
-  });
-
-  //Notification
-  socket.on("Notification", async (data) => {
-    console.log(data, 852);
-    notificationUsers.push(data.userId);
-    io.emit("NotificationData", notificationUsers);
-    let index = notificationUsers.indexOf(data.userId);
-    if (index !== -1) {
-      notificationUsers.splice(index, 1);
-    }
-    if (data.content == "Có Người Nhắn Tin ") {
-      console.log(12);
-      const User = await CRUD.findById(dbUser, dataUser, data.userId);
-
-      const arrayConnect = User.connect;
-
-      arrayConnect.push(data);
-
-      const UpdateUser = await CRUD.updateOneDataAndReturn(
-        dbUser,
-        dataUser,
-        data.userId,
-        { connect: arrayConnect }
-      );
-    }
-  });
-  // Check Offline
-  socket.on("checkUserOffline", (data) => {
-    // onlineUsers.slice(0,0)
-    let index = onlineUsers.indexOf(data.myId);
-    if (index !== -1) {
-      onlineUsers.splice(index, 1);
-    }
-    console.log(onlineUsers, 942);
-    io.emit("Data check User Online", onlineUsers);
-  });
-  // Check Online
-  socket.on("checkUserOnline", (data) => {
-    // onlineUsers.slice(0,0)
-    onlineUsers.push(data.myId);
-    io.emit("Data check User Online", onlineUsers);
-  });
-  // Message
-  socket.on("DataMessage", async (data) => {
-    const findMessage = await CRUD.findById(
-      dbMessage,
-      dataMessage,
-      data.roomId
-    );
-    const OldMessage = findMessage.message;
-    io.to(data.roomId).emit("ServerResponse", { data, OldMessage });
-    OldMessage.push(data);
-    const updateMessage = await CRUD.updateOneDataAndReturn(
-      dbMessage,
-      dataMessage,
-      data.roomId,
-      { message: OldMessage }
-    );
-  });
-});
-// io.listen(4000);
-// server.listen(process.env.PORT_SOCKET, () => {
-//   console.log(`Server is running on http://localhost:${process.env.PORT_SOCKET}`);
-// });
 
 module.exports = {
   connectToDB,

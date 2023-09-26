@@ -5,10 +5,7 @@ import Middleware from '../controller/middlewares'
 let router = express.Router()
 const cors = require("cors");
 
-
 require('dotenv').config();
-
-const keyToken =  process.env.KEY_JWT
 
 const initWebRoute = (app) => {
     // Login
