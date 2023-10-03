@@ -98,7 +98,7 @@ const LoginUser = async (req, res) => {
     const user = await CRUD.findOneName(dbUser, dataUser, req.body.username);
     if (!user) {
       return res.status(404).json({ message: "Not Foud" });
-    } else if (user.password != req.body.password) {
+    } else if (user.password != req.body.password || user.name != req.body.username) {
       console.log("No 400 from Login User");
       return res.status(201).send({ message: "No 201 from Login User" });
     } else if (user.password === req.body.password) {
