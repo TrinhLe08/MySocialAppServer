@@ -562,7 +562,9 @@ const LikePost = async (req, res) => {
       const post = await CRUD.findById(dbPost, dataPost, postId);
       const arrayLike = post.arrayLike;
       const numberLike = post.numberOflike;
-      arrayLike.splice(userId, 1);
+      let indexToDeleteLike = arrayLike.indexOf(userId);
+      console.log(indexToDeleteLike, 566);
+      arrayLike.splice(indexToDeleteLike, 1);
       // Update Post
       const updateNumberLike = await CRUD.updateOneDataAndReturn(
         dbPost,
@@ -676,34 +678,42 @@ const CommentPost = async (req, res) => {
 // Other Profile
 const OtherProfile = async (req, res) => {
   // *
-  const userId = req.body.userId;
-  const myId = req.body.myId;
+  try {
+    const userId = req.body.userId;
+    const myId = req.body.myId;
+  
+    const User = await CRUD.findById(dbUser, dataUser, userId);
+  
+    const View = await CRUD.viewData(dbPost, dataPost);
+  
+    const ViewPost = View.filter((oject) => oject.userId === userId);
+  
+    let connectUser = User.connect.find((user) => user.userId === myId);
+  
+    let connectUserForFale = User.connect.find((user) => user.userId === userId);
 
-  const User = await CRUD.findById(dbUser, dataUser, userId);
-
-  const View = await CRUD.viewData(dbPost, dataPost);
-
-  const ViewPost = View.filter((oject) => oject.userId === userId);
-
-  let connectUser = User.connect.find((user) => user.userId === userId);
-
-  const friendOfUser = User.friend.find((user) => user.userId === myId);
-
-  if (friendOfUser !== undefined && friendOfUser !== false) {
-    connectUser = true;
+    const friendOfUser = User.friend.find((user) => user.userId === myId);
+  
+    console.log(friendOfUser, 692);
+  
+    if (friendOfUser !== undefined && friendOfUser !== false  ) {
+      connectUser = true;
+    }
+  
+    if (friendOfUser == undefined && connectUserForFale != undefined) {
+      connectUser = false;
+    }
+    console.log(connectUser, 682);
+  
+    const OtherUserProfile = Object.assign(User, {
+      Post: ViewPost,
+      checkConnect: connectUser,
+    });
+  
+    return res.send({ OtherUserProfile });
+  } catch ( err) {
+    console.log( err);
   }
-
-  if (friendOfUser == undefined && connectUser != undefined) {
-    connectUser = false;
-  }
-  console.log(connectUser, 682);
-
-  const OtherUserProfile = Object.assign(User, {
-    Post: ViewPost,
-    checkConnect: connectUser,
-  });
-
-  return res.send({ OtherUserProfile });
 };
 
 // ConnectFriend
@@ -836,51 +846,54 @@ const DeleteConnect = async (req, res) => {
 
 // DeleteFriend
 const DeleteFriend = async (req, res) => {
-  console.log(req.body, 754);
-  const userId = req.body.userId;
-  const myId = req.body.myId;
-
-  const Me = await CRUD.findById(dbUser, dataUser, myId);
-  const Friend = await CRUD.findById(dbUser, dataUser, userId);
-
-  const MyArrayFriend = Me.friend;
-
-  const numberFriend = Friend.numberOfFollow - 1;
-  const dataFriend = {
-    userId: userId,
-    name: Friend.name,
-    linkAvatar: Friend.linkAvatar,
-    numberOfPost: Friend.numberOfPost,
-    numberOfFollow: Friend.numberOfFollow,
-  };
-  MyArrayFriend.splice(dataFriend, 1);
-  const numberOfMyFriend = Me.numberOfFollow - 1;
-
-  const myData = {
-    userId: myId,
-    name: Me.name,
-    linkAvatar: Me.linkAvatar,
-    numberOfPost: Me.numberOfPost,
-    numberOfFollow: Me.numberOfFollow,
-  };
-  const arrayFriendToPush = Friend.friend;
-  arrayFriendToPush.splice(myData, 1);
-
-  const MyUpdate = await CRUD.updateOneDataAndReturn(dbUser, dataUser, myId, {
-    friend: MyArrayFriend,
-    numberOfFollow: numberOfMyFriend,
-  });
-
-  const friendUpdate = await CRUD.updateOneDataAndReturn(
-    dbUser,
-    dataUser,
-    userId,
-    {
-      friend: arrayFriendToPush,
-      numberOfFollow: numberFriend,
-    }
-  );
-  return res.send({ MyUpdate });
+  try {
+    console.log(req.body, 754);
+    const userId = req.body.userId;
+    const myId = req.body.myId;
+  
+    const Me = await CRUD.findById(dbUser, dataUser, myId);
+    const Friend = await CRUD.findById(dbUser, dataUser, userId);
+  
+    const MyArrayFriend = Me.friend;
+  
+    const numberFriend = Friend.numberOfFollow - 1;
+    let valueToDelete = MyArrayFriend.find(f => f.userId === userId);
+    console.log(valueToDelete, 857);
+    let indexToDelete = MyArrayFriend.indexOf(valueToDelete); 
+    console.log(indexToDelete, 864);
+    MyArrayFriend.splice(indexToDelete, 1);
+    const numberOfMyFriend = Me.numberOfFollow - 1;
+  
+    const myData = {
+      userId: myId,
+      name: Me.name,
+      linkAvatar: Me.linkAvatar,
+      numberOfPost: Me.numberOfPost,
+      numberOfFollow: Me.numberOfFollow,
+    };
+    const arrayFriendToPush = Friend.friend;
+    let myValueToDelete = arrayFriendToPush.find(m => m.userId === myId)
+    let myIndexToDelete = arrayFriendToPush.indexOf(myValueToDelete); 
+    arrayFriendToPush.splice(myIndexToDelete, 1);
+  
+    const MyUpdate = await CRUD.updateOneDataAndReturn(dbUser, dataUser, myId, {
+      friend: MyArrayFriend,
+      numberOfFollow: numberOfMyFriend,
+    });
+  
+    const friendUpdate = await CRUD.updateOneDataAndReturn(
+      dbUser,
+      dataUser,
+      userId,
+      {
+        friend: arrayFriendToPush,
+        numberOfFollow: numberFriend,
+      }
+    );
+    return res.send({ MyUpdate });
+  } catch ( err) {
+    console.log(err);
+  }
 };
 
 // MessageId
