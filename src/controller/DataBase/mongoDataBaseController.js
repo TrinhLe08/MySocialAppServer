@@ -110,6 +110,8 @@ const LoginUser = async (req, res) => {
       );
       // View Post
       const View = await CRUD.viewData(dbPost, dataPost);
+      let arrayView = View.sort((a, b) => b.numberOflike - a.numberOflike);
+      let top5Post = arrayView.slice(0, 5);
       // Lọc ra số bài đã like
       const ViewPost = View.map((obj) => ({
         ...obj,
@@ -130,7 +132,7 @@ const LoginUser = async (req, res) => {
       delete user.password;
       return res
         .status(200)
-        .send({ user, token, ViewPost, myPost, user, AllUsers });
+        .send({ user, token, ViewPost, myPost, user, AllUsers, top5Post });
     } 
   } catch (error) {
     console.log(error);
