@@ -680,10 +680,13 @@ const CommentPost = async (req, res) => {
 const OtherProfile = async (req, res) => {
   // *
   try {
+    console.log(req.body);
     const userId = req.body.userId;
     const myId = req.body.myId;
   
     const User = await CRUD.findById(dbUser, dataUser, userId);
+
+    console.log(User, 638);
   
     const View = await CRUD.viewData(dbPost, dataPost);
   
@@ -691,11 +694,11 @@ const OtherProfile = async (req, res) => {
   
     let connectUser = User.connect.find((user) => user.userId === myId);
   
-    let connectUserForFale = User.connect.find((user) => user.userId === userId);
+    let connectUserForFale = User.connect.find((user) => user.myId === myId);
 
     const friendOfUser = User.friend.find((user) => user.userId === myId);
   
-    console.log(friendOfUser, 692);
+    console.log(friendOfUser,connectUser, 692);
   
     if (friendOfUser !== undefined && friendOfUser !== false  ) {
       connectUser = true;
@@ -760,86 +763,88 @@ const ConnectFriend = async (req, res) => {
 
 // DeleteConnect
 const DeleteConnect = async (req, res) => {
-  console.log(req.body);
-  const userId = req.body.userId;
-  const myId = req.body.myId;
-  const Or = req.body.or;
-
-  const Me = await CRUD.findById(dbUser, dataUser, myId);
-  const Friend = await CRUD.findById(dbUser, dataUser, userId);
-
-  const arrayConnect = Me.connect;
-  const myArrayFriend = Me.friend;
-  const arrayFriendToPush = Friend.friend;
-
-  const connectUser = arrayConnect.find((user) => user.userId === myId);
-
-  console.log(arrayConnect, 727);
-
-  if (connectUser) {
-    if (Or) {
-      arrayConnect.map((oject) => {
-        if (oject.userId == myId) {
-          arrayConnect.splice(oject, 1);
-        }
-      });
-      const numberFriend = Friend.numberOfFollow + 1;
-      const dataFriend = {
-        userId: userId,
-        name: Friend.name,
-        linkAvatar: Friend.linkAvatar,
-        numberOfPost: Friend.numberOfPost,
-        numberOfFollow: Friend.numberOfFollow,
-      };
-      myArrayFriend.push(dataFriend);
-      const numberOfMyFriend = Me.numberOfFollow + 1;
-
-      const myData = {
-        userId: myId,
-        name: Me.name,
-        linkAvatar: Me.linkAvatar,
-        numberOfPost: Me.numberOfPost,
-        numberOfFollow: Me.numberOfFollow,
-      };
-      arrayFriendToPush.push(myData);
-
-      const MyUpdate = await CRUD.updateOneDataAndReturn(
-        dbUser,
-        dataUser,
-        myId,
-        {
-          connect: arrayConnect,
-          friend: myArrayFriend,
-          numberOfFollow: numberOfMyFriend,
-        }
-      );
-
-      const friendUpdate = await CRUD.updateOneDataAndReturn(
-        dbUser,
-        dataUser,
-        userId,
-        {
-          connect: arrayConnect,
-          friend: arrayFriendToPush,
-          numberOfFollow: numberFriend,
-        }
-      );
-      return res.send({ MyUpdate });
-    } else {
-      arrayConnect.map((oject) => {
-        if (oject.userId == userId) {
-          arrayConnect.splice(oject, 1);
-        }
-      });
-      console.log(arrayConnect, 656);
-      const MyUpdate = await CRUD.updateOneDataAndReturn(
-        dbUser,
-        dataUser,
-        myId,
-        { connect: arrayConnect }
-      );
-      return res.send({ MyUpdate });
+  try {
+    console.log(req.body);
+    const userId = req.body.userId;
+    const myId = req.body.myId;
+    const Or = req.body.or;
+  
+    const Me = await CRUD.findById(dbUser, dataUser, myId);
+    const Friend = await CRUD.findById(dbUser, dataUser, userId);
+  
+    const arrayConnect = Me.connect;
+    const myArrayFriend = Me.friend;
+    const arrayFriendToPush = Friend.friend;
+  
+    const connectUser = arrayConnect.find((user) => user.userId === myId);
+  
+    if (connectUser) {
+      if (Or) {
+        arrayConnect.map((oject) => {
+          if (oject.myId == userId) {
+            arrayConnect.splice(arrayConnect.indexOf(oject), 1);
+          }
+        });
+        const numberFriend = Friend.numberOfFollow + 1;
+        const dataFriend = {
+          userId: userId,
+          name: Friend.name,
+          linkAvatar: Friend.linkAvatar,
+          numberOfPost: Friend.numberOfPost,
+          numberOfFollow: Friend.numberOfFollow,
+        };
+        myArrayFriend.push(dataFriend);
+        const numberOfMyFriend = Me.numberOfFollow + 1;
+  
+        const myData = {
+          userId: myId,
+          name: Me.name,
+          linkAvatar: Me.linkAvatar,
+          numberOfPost: Me.numberOfPost,
+          numberOfFollow: Me.numberOfFollow,
+        };
+        arrayFriendToPush.push(myData);
+  
+        const MyUpdate = await CRUD.updateOneDataAndReturn(
+          dbUser,
+          dataUser,
+          myId,
+          {
+            connect: arrayConnect,
+            friend: myArrayFriend,
+            numberOfFollow: numberOfMyFriend,
+          }
+        );
+  
+        const friendUpdate = await CRUD.updateOneDataAndReturn(
+          dbUser,
+          dataUser,
+          userId,
+          {
+            connect: arrayConnect,
+            friend: arrayFriendToPush,
+            numberOfFollow: numberFriend,
+          }
+        );
+        return res.send({ MyUpdate });
+      } else {
+        arrayConnect.map((oject) => {
+          if (oject.myId == userId) {
+            console.log(oject.name);
+            arrayConnect.splice(arrayConnect.indexOf(oject), 1);
+          }
+        });
+        const MyUpdate = await CRUD.updateOneDataAndReturn(
+          dbUser,
+          dataUser,
+          myId,
+          { connect: arrayConnect }
+        );
+        return res.send({ MyUpdate });
+      }
     }
+  } catch(err) {
+    console.log(err);
   }
 
   return;
